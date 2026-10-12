@@ -6,6 +6,7 @@ import RoutesPage from './pages/RoutesPage';
 import EventsPage from './pages/EventsPage';
 import EventDetail from './pages/EventDetail';
 import StorePage from './pages/StorePage';
+import ProductDetail from './pages/ProductDetail';
 import UsedPage from './pages/UsedPage';
 import AdvisorPage from './pages/AdvisorPage';
 import AchievementsPage from './pages/AchievementsPage';
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="events" element={<EventsPage />} />
         <Route path="events/:id" element={<EventDetail />} />
         <Route path="store" element={<StorePage />} />
+        <Route path="store/:id" element={<ProductDetail />} />
         <Route path="advisor" element={<AdvisorPage />} />
         <Route path="achievements" element={<AchievementsPage />} />
         <Route path="used" element={<UsedPage />} />
