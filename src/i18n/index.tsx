@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { Lang } from '../types';
 import { dict, type Key } from './dictionary';
 
-interface I18n { lang: Lang; dir: 'rtl' | 'ltr'; t: (k: Key) => string; setLang: (l: Lang) => void; toggleLang: () => void; pick: (o: { ar: string; en: string }) => string }
+interface I18n { lang: Lang; dir: 'rtl' | 'ltr'; t: (k: Key) => string; setLang: (l: Lang) => void; toggleLang: () => void; pick: (o: { ar: string; en: string }) => string; tr: (ar: string, en: string) => string }
 const Ctx = createContext<I18n | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -15,8 +15,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [lang, dir]);
   const t = useCallback((k: Key) => dict[lang][k], [lang]);
   const pick = useCallback((o: { ar: string; en: string }) => o[lang], [lang]);
+  const tr = useCallback((ar: string, en: string) => (lang === 'ar' ? ar : en), [lang]);
   const toggleLang = useCallback(() => setLang((l) => (l === 'ar' ? 'en' : 'ar')), []);
-  return <Ctx.Provider value={{ lang, dir, t, setLang, toggleLang, pick }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ lang, dir, t, setLang, toggleLang, pick, tr }}>{children}</Ctx.Provider>;
 }
 export function useI18n() {
   const c = useContext(Ctx);
