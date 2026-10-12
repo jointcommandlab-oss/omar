@@ -5,10 +5,12 @@ import Logo from './Logo';
 import { navItems } from './navItems';
 import { useI18n } from '../i18n';
 import { useTheme } from '../hooks/useTheme';
+import { useCart } from '../hooks/useCart';
 
 export default function Header() {
   const { t, toggleLang } = useI18n();
   const { theme, toggle } = useTheme();
+  const { count } = useCart();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   useEffect(() => setOpen(false), [pathname]);
@@ -34,7 +36,10 @@ export default function Header() {
           <Link to="/settings" className="icon-btn" aria-label={t('hdr.settings')}><Settings size={20} /></Link>
           <Link to="/notifications" className="icon-btn" aria-label={t('hdr.notifications')}><Bell size={20} /></Link>
           <button onClick={toggle} className="icon-btn" aria-label={t('hdr.theme')}>{theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}</button>
-          <Link to="/cart" className="icon-btn" aria-label={t('hdr.cart')}><ShoppingCart size={20} /></Link>
+          <Link to="/cart" className="icon-btn relative" aria-label={count ? `${t('hdr.cart')} (${count})` : t('hdr.cart')}>
+            <ShoppingCart size={20} />
+            {count > 0 && <span aria-hidden className="absolute -end-1 -top-1 grid min-w-5 place-items-center rounded-full bg-brand px-1 text-[11px] font-bold leading-5 text-white">{count > 99 ? '99+' : count}</span>}
+          </Link>
           <button onClick={() => setOpen((o) => !o)} className="icon-btn lg:hidden" aria-expanded={open} aria-label={open ? t('hdr.close') : t('hdr.menu')}>
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>

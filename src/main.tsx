@@ -4,12 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { I18nProvider } from './i18n';
 import { ThemeProvider } from './hooks/useTheme';
+import { CartProvider } from './hooks/useCart';
 import './styles/index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <I18nProvider><ThemeProvider><App /></ThemeProvider></I18nProvider>
+      <I18nProvider><ThemeProvider><CartProvider><App /></CartProvider></ThemeProvider></I18nProvider>
     </BrowserRouter>
   </StrictMode>,
 );

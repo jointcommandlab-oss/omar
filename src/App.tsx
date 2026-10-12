@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import RoutesPage from './pages/RoutesPage';
 import EventsPage from './pages/EventsPage';
 import StorePage from './pages/StorePage';
+import ProductDetail from './pages/ProductDetail';
 import UsedPage from './pages/UsedPage';
 import AdvisorPage from './pages/AdvisorPage';
 import AchievementsPage from './pages/AchievementsPage';
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="routes/:id" element={<RouteDetail />} />
         <Route path="events" element={<EventsPage />} />
         <Route path="store" element={<StorePage />} />
+        <Route path="store/:id" element={<ProductDetail />} />
         <Route path="advisor" element={<AdvisorPage />} />
         <Route path="achievements" element={<AchievementsPage />} />
         <Route path="used" element={<UsedPage />} />
