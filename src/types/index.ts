@@ -1,7 +1,10 @@
+import type { RouteGeo } from './routeGeo';
+export type { RouteGeo } from './routeGeo';
+
 export type Lang = 'ar' | 'en';
 export type Theme = 'light' | 'dark';
 
-export interface RouteItem {
+export interface RouteItem extends RouteGeo {
   id: string;
   title: { ar: string; en: string };
   emirate: string;

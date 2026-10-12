@@ -15,9 +15,17 @@ export default function RoutesPage() {
   const [em, setEm] = useState('all');
   const [sort, setSort] = useState<'name' | 'emirate'>('name');
   const [favs] = useLocalState<string[]>('cae-fav-routes', []);
+  const [diff, setDiff] = useState('all');
+  const [light, setLight] = useState('all');
+  const [minKm, setMinKm] = useState('');
+  const [maxKm, setMaxKm] = useState('');
   const list = useMemo(() => sampleRoutes
     .filter((r) => (em === 'all' || r.emirate === em) && pick(r.title).toLowerCase().includes(q.trim().toLowerCase()))
-    .sort((a, b) => sort === 'name' ? pick(a.title).localeCompare(pick(b.title)) : a.emirate.localeCompare(b.emirate)), [q, em, sort, pick]);
+    // Optional filters only exclude routes whose value is known and mismatched; unknown values stay visible.
+    .filter((r) => diff === 'all' || !r.difficulty || r.difficulty === diff)
+    .filter((r) => light === 'all' || !r.lighting || r.lighting === light)
+    .filter((r) => r.distanceKm == null || ((minKm === '' || r.distanceKm >= Number(minKm)) && (maxKm === '' || r.distanceKm <= Number(maxKm))))
+    .sort((a, b) => sort === 'name' ? pick(a.title).localeCompare(pick(b.title)) : a.emirate.localeCompare(b.emirate)), [q, em, sort, pick, diff, light, minKm, maxKm]);
   const field = 'card w-full px-4 py-3';
   return (
     <>
@@ -36,6 +44,22 @@ export default function RoutesPage() {
             <option value="name">{tr('الاسم', 'Name')}</option>
             <option value="emirate">{tr('الإمارة', 'Emirate')}</option>
           </select>
+          <select value={diff} onChange={(e) => setDiff(e.target.value)} aria-label={tr('الصعوبة', 'Difficulty')} className={field}>
+            <option value="all">{tr('كل مستويات الصعوبة', 'All difficulties')}</option>
+            <option value="easy">{tr('سهل', 'Easy')}</option>
+            <option value="moderate">{tr('متوسط', 'Moderate')}</option>
+            <option value="hard">{tr('صعب', 'Hard')}</option>
+          </select>
+          <select value={light} onChange={(e) => setLight(e.target.value)} aria-label={tr('الإضاءة', 'Lighting')} className={field}>
+            <option value="all">{tr('كل أنواع الإضاءة', 'All lighting')}</option>
+            <option value="lit">{tr('مضاء', 'Lit')}</option>
+            <option value="partial">{tr('إضاءة جزئية', 'Partially lit')}</option>
+            <option value="unlit">{tr('غير مضاء', 'Unlit')}</option>
+          </select>
+          <div className="grid grid-cols-2 gap-3">
+            <input type="number" min={0} inputMode="decimal" value={minKm} onChange={(e) => setMinKm(e.target.value)} placeholder={tr('من (كم)', 'Min km')} aria-label={tr('أقل مسافة', 'Min distance')} className={field} />
+            <input type="number" min={0} inputMode="decimal" value={maxKm} onChange={(e) => setMaxKm(e.target.value)} placeholder={tr('إلى (كم)', 'Max km')} aria-label={tr('أكبر مسافة', 'Max distance')} className={field} />
+          </div>
           <p className="flex items-center gap-2 text-sm text-neutral-500"><Heart size={16} aria-hidden /> {tr('المفضلة', 'Favorites')}: {favs.length}</p>
         </div>
         <div className="mb-4 flex items-center gap-3 text-sm text-neutral-500">{list.length} {t('stat.routes')} <SampleBadge /></div>
@@ -44,7 +68,7 @@ export default function RoutesPage() {
             {list.map((r) => <Link key={r.id} to={`/routes/${r.id}`} className="block"><RouteCard route={r} /></Link>)}
           </div>
         ) : <EmptyState icon={Map} title={tr('لا توجد مسارات مطابقة', 'No matching routes')} desc={tr('جرّب تغيير البحث أو الفلتر.', 'Try changing the search or filter.')} />}
-        <p className="mt-6 text-sm text-neutral-500">{tr('فلاتر الصعوبة والمسافة والإضاءة تُضاف عند توفر بيانات موثّقة.', 'Difficulty, distance and lighting filters arrive once verified data exists.')}</p>
+        <p className="mt-6 text-sm text-neutral-500">{tr('الفلاتر تنطبق فقط على المسارات ذات البيانات الموثّقة؛ غير الموثّق يبقى ظاهراً (غير موثّق بعد).', 'Filters only apply to routes with verified data; unverified routes stay visible (not verified yet).')}</p>
       </div>
     </>
   );

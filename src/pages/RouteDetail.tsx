@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Heart, Info, MapPin } from 'lucide-react';
 import PageBanner from '../components/PageBanner';
@@ -6,6 +7,11 @@ import { sampleRoutes } from '../data/sample';
 import { useI18n, type Key } from '../i18n';
 import { useLocalState } from '../hooks/useLocalState';
 import { Map as MapIcon } from 'lucide-react';
+import { hasVerifiedGeo } from '../types/routeGeo';
+
+const RouteMap = lazy(() => import('../components/RouteMap'));
+const diffL = { easy: ['سهل', 'Easy'], moderate: ['متوسط', 'Moderate'], hard: ['صعب', 'Hard'] } as const;
+const lightL = { lit: ['مضاء', 'Lit'], partial: ['إضاءة جزئية', 'Partially lit'], unlit: ['غير مضاء', 'Unlit'] } as const;
 
 export default function RouteDetail() {
   const { id } = useParams();
@@ -19,9 +25,9 @@ export default function RouteDetail() {
     [tr('الإمارة', 'Emirate'), t(`em.${r.emirate}` as Key)],
     [tr('المسافة', 'Distance'), r.distanceKm === null ? unknown : `${r.distanceKm} ${t('km')}`],
     [tr('الوقت التقديري', 'Estimated time'), unknown],
-    [tr('الارتفاع', 'Elevation'), unknown],
-    [tr('الصعوبة', 'Difficulty'), unknown],
-    [tr('الإضاءة', 'Lighting'), unknown],
+    [tr('الارتفاع', 'Elevation'), r.elevationM == null ? unknown : `${r.elevationM} ${tr('م', 'm')}`],
+    [tr('الصعوبة', 'Difficulty'), r.difficulty ? tr(diffL[r.difficulty][0], diffL[r.difficulty][1]) : unknown],
+    [tr('الإضاءة', 'Lighting'), r.lighting ? tr(lightL[r.lighting][0], lightL[r.lighting][1]) : unknown],
   ];
   return (
     <>
@@ -35,13 +41,19 @@ export default function RouteDetail() {
         <dl className="card divide-y divide-neutral-100 dark:divide-white/10">
           {rows.map(([k, v]) => <div key={k} className="flex justify-between p-4"><dt className="text-neutral-500">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
         </dl>
-        <div className="card flex items-start gap-3 p-4 text-sm text-neutral-600 dark:text-neutral-300">
-          <MapPin className="mt-0.5 shrink-0 text-brand" size={18} aria-hidden />
-          <p>{tr('الخريطة (Leaflet + OpenStreetMap) تُضاف مع نقاط البداية والنهاية الموثّقة؛ لا نعرض مواقع تقريبية.', 'The map (Leaflet + OpenStreetMap) arrives with verified start/finish points; we do not show approximate locations.')}</p>
-        </div>
+        {hasVerifiedGeo(r) ? (
+          <Suspense fallback={<div className="card h-72 animate-pulse" aria-busy="true" />}><RouteMap route={r} /></Suspense>
+        ) : (
+          <div className="card flex items-start gap-3 p-4 text-sm text-neutral-600 dark:text-neutral-300">
+            <MapPin className="mt-0.5 shrink-0 text-brand" size={18} aria-hidden />
+            <p>{tr('الخريطة (Leaflet + OpenStreetMap) تُضاف مع نقاط البداية والنهاية الموثّقة؛ لا نعرض مواقع تقريبية.', 'The map (Leaflet + OpenStreetMap) arrives with verified start/finish points; we do not show approximate locations.')}</p>
+          </div>
+        )}
         <div className="card flex items-start gap-3 p-4 text-sm text-neutral-600 dark:text-neutral-300">
           <Info className="mt-0.5 shrink-0 text-brand" size={18} aria-hidden />
-          <p>{tr('مصدر البيانات: عيّنة تجريبية داخلية — لم تُراجع ميدانياً.', 'Data source: internal demo sample — not field-verified.')}</p>
+          <p>{r.source
+            ? <>{tr('مصدر البيانات', 'Data source')}: {r.source}{r.verifiedAt && <> — {tr('تاريخ التوثيق', 'Verified')}: {r.verifiedAt}</>}</>
+            : tr('مصدر البيانات: عيّنة تجريبية داخلية — لم تُراجع ميدانياً.', 'Data source: internal demo sample — not field-verified.')}</p>
         </div>
       </div>
     </>
