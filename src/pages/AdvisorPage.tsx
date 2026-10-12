@@ -1,11 +1,24 @@
 import { Crown, Lock, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useI18n, type Key } from '../i18n';
+import AdvisorForm from '../components/AdvisorForm';
+import { IS_DEV, IS_SUBSCRIBER } from '../config/features';
 
 const bullets: Key[] = ['adv.b1', 'adv.b2', 'adv.b3', 'adv.b4'];
 
 export default function AdvisorPage() {
-  const { t } = useI18n();
+  const { t, tr } = useI18n();
+  const [preview, setPreview] = useState(false);
+  if (IS_SUBSCRIBER || (IS_DEV && preview)) {
+    return (
+      <div className="bg-ink px-4 py-10 text-white">
+        <h1 className="mb-6 text-center text-3xl font-extrabold">{tr('مستشار المسارات', 'Route advisor')}</h1>
+        <AdvisorForm />
+        {IS_DEV && !IS_SUBSCRIBER && <button type="button" onClick={() => setPreview(false)} className="mx-auto mt-6 block text-sm underline">{tr('إخفاء المعاينة', 'Hide preview')}</button>}
+      </div>
+    );
+  }
   return (
     <div className="bg-ink px-4 py-16 text-white">
       <div className="mx-auto max-w-lg text-center">
@@ -17,6 +30,7 @@ export default function AdvisorPage() {
         </ul>
         <Link to="/subscription" className="btn-primary mt-6 w-full py-4 text-lg">{t('adv.cta')} <Crown size={18} aria-hidden /></Link>
         <p className="mt-4 text-xs text-neutral-500">{t('adv.note')}</p>
+        {IS_DEV && <button type="button" onClick={() => setPreview(true)} className="mt-4 text-sm underline">{tr('معاينة (تطوير فقط)', 'Preview (dev only)')}</button>}
       </div>
     </div>
   );
